@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Multimedia Project</title>
+  <link href="style.css" rel="stylesheet">
+</head>
+<body>
+    <!--nav-->
+    <div class="nav">
+        <ul>
+            <li>Discussion</li>
+            <li>About</li>
+        </ul>
+    </div>
+<!--page 1-->
+<div class="page1">
+    <!--title-->
+    <h1>The Rocky Road to Queerness</h1>
+    <h2>How have you questioned your identity and in what ways has it changed over time? Share your story!</h2>
+    <div class="discussion">
+
+    </div>
+</div>
+
+<hr>
+
+<!--page 2-->
+<div class="page2">
+    <!--title-->
+    <h1>The Rocky Road to Bisexuality: A Note From a Lesbian In Love With a Man</h1>
+    
+</div>
+
+<script>
+    const getData = async () => {
+        const url = 'https://etbd.tech/hausmar2_455707/wdata/getjson.php?file=blank.json';
+        const response = await fetch(url);
+        const data = await response.json();
+        list = [...data];
+        showData();
+    }
+
+    const putData = async () => {
+        const url = 'https://etbd.tech/hausmar2_455707/wdata/putjson.php?file=blank.json';
+        const response = await fetch(url, {
+            method: "POST",
+            body: JSON.stringify(list),
+            headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            }
+        });
+        const responseText = await response.text();
+    }
+
+    const showData = () => {
+        commentsList.innerHTML = "";
+        list.forEach(item => {
+            commentsList.innerHTML += `Comment from ${item.username}: ${item.textfield}<br>`;
+        });
+    }
+
+    getData();
+
+    form.addEventListener("submit", function(event) {
+        event.preventDefault();
+        username = username_input.value;
+        textfield = textfield_input.value;
+        list.push({"textfield": textfield, "username": username})
+        putData();
+        showData();
+        textfield_input.value = '';
+    });
+</script>
+</body>
+</html>
