@@ -9,69 +9,135 @@
 <body>
     <!--nav-->
     <div class="nav">
+        <img src="" alt="logo">
         <ul>
-            <li>Discussion</li>
-            <li>About</li>
+            <li id="navNotes">Notes Project</li>
+            <li id="navAbout">The Archive Project</li>
         </ul>
     </div>
 <!--page 1-->
 <div class="page1">
     <!--title-->
-    <h1>The Rocky Road to Queerness</h1>
-    <h2>How have you questioned your identity and in what ways has it changed over time? Share your story!</h2>
-    <div class="discussion">
-
+    <h1>A Note From Questioning Queer Users</h1>
+    <h4>How has your queer identity changed over time? Share your story!</h4>
+    <div class="notes">
+        <h3>Write a Note:</h3>
+        <form>
+            <input type="text" name="username" id="username" placeholder="Name">
+            <br>
+            <input type="text" name="textfield" id="textfield" placeholder="*Type your comment...">
+            <br>
+            <input type="submit" id="submit" value="Submit">
+        </form>
+        <div id="notesGrid" class="notes-grid"></div>
     </div>
 </div>
 
 <hr>
 
 <!--page 2-->
-<div class="page2">
+<div class="page2 hidden">
     <!--title-->
     <h1>The Rocky Road to Bisexuality: A Note From a Lesbian In Love With a Man</h1>
     
 </div>
 
-<script>
-    const getData = async () => {
-        const url = 'https://etbd.tech/hausmar2_455707/wdata/getjson.php?file=blank.json';
-        const response = await fetch(url);
-        const data = await response.json();
-        list = [...data];
-        showData();
-    }
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+    import {getFirestore, collection, addDoc, getDocs, query, orderBy} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    const putData = async () => {
-        const url = 'https://etbd.tech/hausmar2_455707/wdata/putjson.php?file=blank.json';
-        const response = await fetch(url, {
-            method: "POST",
-            body: JSON.stringify(list),
-            headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            }
+    const firebaseConfig = {
+        apiKey: "AIzaSyCP4thIMR3Gso6iSowI7fzKg5zdgQPDPHk",
+        authDomain: "multimediaproject-d0c45.firebaseapp.com",
+        projectId: "multimediaproject-d0c45",
+        storageBucket: "multimediaproject-d0c45.firebasestorage.app",
+        messagingSenderId: "157658742386",
+        appId: "1:157658742386:web:b7c58e26e723e2a4500ceb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const form = document.querySelector("form");
+    const username_input = document.getElementById("username");
+    const textfield_input = document.getElementById("textfield");
+    const notesGrid = document.getElementById("notesGrid");
+
+    const colors = [
+        "note-yellow",
+        "note-pink",
+        "note-blue",
+        "note-green",
+        "note-purple",
+        "note-orange"
+    ];
+
+    // load existing notes
+    async function loadNotes() {
+        notesGrid.innerHTML = "";
+
+        const q = query(collection(db, "comments"), orderBy("created", "desc"));
+        const snapshot = await getDocs(q);
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+
+            const randomColor = data.color || colors[Math.floor(Math.random() * colors.length)];
+
+            notesGrid.innerHTML += `
+            <div class="note ${randomColor}">
+            <span class="user">${data.username}</span>
+            <div class="text">${data.textfield}</div>
+            </div>
+            `;
         });
-        const responseText = await response.text();
     }
 
-    const showData = () => {
-        commentsList.innerHTML = "";
-        list.forEach(item => {
-            commentsList.innerHTML += `Comment from ${item.username}: ${item.textfield}<br>`;
-        });
-    }
+    loadNotes();
 
-    getData();
-
-    form.addEventListener("submit", function(event) {
+    // submit new note
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        username = username_input.value;
-        textfield = textfield_input.value;
-        list.push({"textfield": textfield, "username": username})
-        putData();
-        showData();
-        textfield_input.value = '';
+
+        const username = username_input.value || "anon";
+        const textfield = textfield_input.value;
+
+        if (!textfield) {
+            alert("Please enter your note!");
+            return;
+        }
+
+        // assign color
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+
+        await addDoc(collection(db, "comments"), {
+            username: username,
+            textfield: textfield,
+            color: randomColor,
+            created: Date.now()
+        });
+
+        username_input.value = "";
+        textfield_input.value = "";
+
+        loadNotes();
+    });
+
+    //toggle pages
+    const navNotes = document.getElementById("navNotes");
+    const navAbout = document.getElementById("navAbout");
+
+    const page1 = document.querySelector(".page1");
+    const page2 = document.querySelector(".page2");
+
+    navNotes.addEventListener("click", () => {
+        page1.classList.remove("hidden");
+        page2.classList.add("hidden");
+    });
+
+    navAbout.addEventListener("click", () => {
+        page2.classList.remove("hidden");
+        page1.classList.add("hidden");
     });
 </script>
 </body>
