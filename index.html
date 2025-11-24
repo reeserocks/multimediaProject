@@ -39,7 +39,7 @@
 <div class="page2 hidden">
     <!--title-->
     <h1>The Rocky Road to Bisexuality: A Note From a Lesbian In Love With a Man</h1>
-    
+    <h4>by Reese Hausman</h4>
 </div>
 
 <script type="module">
@@ -56,7 +56,10 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const db = initializeFirestore(app, {
+        experimentalForceLongPolling: true,
+        experimentalAutoDetectLongPolling: false
+    });
 
     const form = document.querySelector("form");
     const username_input = document.getElementById("username");
